@@ -9,7 +9,7 @@ common_bp = Blueprint('common', __name__)
 def index():
     """Main page"""
     dataset_loaded = current_dataset is not None
-    return render_template("frontface.html", dataset_loaded=dataset_loaded)
+    return render_template("index.html", dataset_loaded=dataset_loaded)
 
 @common_bp.route("/check_dataset_status")
 def check_dataset_status():
@@ -84,30 +84,3 @@ def select_department():
         flash("Invalid department selected", "error")
         return redirect(url_for("common.index"))
 
-@common_bp.route("/predict", methods=["POST"])
-def predict():
-    """Handle AJAX prediction requests for future enrollment"""
-    try:
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'No data provided'})
-        
-        course = data.get('course', '').strip()
-        year = data.get('year', '').strip()
-        semester = data.get('semester', '').strip()
-        
-        if not all([course, year, semester]):
-            return jsonify({'error': 'Missing required parameters'})
-        
-        # Make prediction
-        prediction = predict_enrollment_fallback(course, year, semester)
-        
-        return jsonify({
-            'prediction': prediction,
-            'course': course,
-            'year': year,
-            'semester': semester
-        })
-        
-    except Exception as e:
-        return jsonify({'error': f'Prediction error: {str(e)}'})
